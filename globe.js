@@ -9,7 +9,7 @@
         {
   sel: '[data-globe="1"]',
   cx: 0.50,
-  cy: 1.22,
+  cy: 1.46,
   r: 0.50,
   yaw: 20,
   pitch: -10,
