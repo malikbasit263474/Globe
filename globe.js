@@ -7,16 +7,16 @@
   
       sections: [
         {
-  sel: '[data-globe="1"]',
-  cx: 0.50,
-  cy: 1.72,
-  r: 0.46,
-  yaw: 20,
-  pitch: -10,
-  op: 1,
-  blur: 0,
-  bg: 0
-},
+          sel: '[data-globe="1"]',
+          cx: 0.50,
+          cy: 1.13,
+          r: 0.50,
+          yaw: 20,
+          pitch: -10,
+          op: 1,
+          blur: 0,
+          bg: 0
+        },
         {
           sel: '[data-globe="2"]',
           cx: 0.12,
@@ -1038,13 +1038,13 @@
           B.kf.cx,
           progress
         ) * VW;
-
+  
       CY =
-  lerp(
-    A.kf.cy,
-    B.kf.cy,
-    progress
-  ) * VH;
+        lerp(
+          A.kf.cy,
+          B.kf.cy,
+          progress
+        ) * VH;
   
       R =
         lerp(
