@@ -1038,13 +1038,20 @@
           B.kf.cx,
           progress
         ) * VW;
-  
+        
+  var HERO_GLOBE_OFFSET_Y = 180;
+
+// 1 = hero
+// 0 = second globe section
+var heroInfluence = 1 - progress;
+
       CY =
-        lerp(
-          A.kf.cy,
-          B.kf.cy,
-          progress
-        ) * VH;
+  lerp(
+    A.kf.cy,
+    B.kf.cy,
+    progress
+  ) * VH +
+  HERO_GLOBE_OFFSET_Y * heroInfluence;
   
       R =
         lerp(
