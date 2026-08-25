@@ -18,39 +18,66 @@
      */
 
     sections: [
-  {
-    sel: '[data-globe="1"]',
+      {
+        sel: '[data-globe="1"]',
 
-    cx: 0.50,
-    cy: 1.13,
-    r: 0.50,
+        cx: 0.50,
+        cy: 1.13,
+        r: 0.50,
 
-    yaw: 20,
-    pitch: -10,
+        yaw: 20,
+        pitch: -10,
 
-    opacity: 1,
-    blur: 0,
-    glowOpacity: 1
-  },
+        opacity: 1,
+        blur: 0,
+        glowOpacity: 1
+      },
 
-  {
-    sel: '[data-globe="2"]',
+      {
+        sel: '[data-globe="2"]',
 
-    cx: 0.12,
-    cy: 0.72,
-    r: 0.40,
+        cx: 0.12,
+        cy: 0.72,
+        r: 0.40,
 
-    yaw: 110,
-    pitch: 14,
+        yaw: 110,
+        pitch: 14,
 
-    opacity: 1,
-    blur: 1,
-    glowOpacity: 0
-  }
-],
+        opacity: 1,
+        blur: 1,
+        glowOpacity: 0
+      }
+    ],
 
 
     maxDpr: 2,
+
+
+    /* =====================================================
+       GLOBE EXIT
+
+       Globe disappears BEFORE testimonials enter.
+    ===================================================== */
+
+    sceneExit: {
+
+      selector:
+        ".testimonial_home",
+
+      /*
+       * Short smooth fade.
+       */
+      fadeDistanceVh:
+        0.35,
+
+      /*
+       * 0 = fully gone exactly before
+       * testimonial enters viewport.
+       */
+      endBeforeViewportVh:
+        0
+
+    },
 
 
     /* =====================================================
@@ -66,21 +93,20 @@
 
     /* =====================================================
        GLOBE BODY
-
-       THESE VALUES CREATE YOUR FRIEND'S BLUE ATMOSPHERE.
     ===================================================== */
 
-   bodyDark: [
-  46,
-  41,
-  86
-],
+    bodyDark: [
+      46,
+      41,
+      86
+    ],
 
-bodyLit: [
-  58,
-  52,
-  98
-],
+    bodyLit: [
+      58,
+      52,
+      98
+    ],
+
 
     /*
      * Blue atmospheric rim.
@@ -135,9 +161,6 @@ bodyLit: [
 
     /* =====================================================
        LIGHTING
-
-       This is important.
-       It prevents globe from looking flat.
     ===================================================== */
 
     lightAz: -20,
@@ -160,9 +183,6 @@ bodyLit: [
 
     /*
      * BLUE GLOW AROUND GLOBE.
-     *
-     * glow controls intensity.
-     * glowSpread controls how far outside globe it travels.
      */
 
     glow: 0.25,
@@ -221,45 +241,27 @@ bodyLit: [
        WARM ORANGE GLOW BEHIND GLOBE
     ===================================================== */
 
-   backGlow: {
+    backGlow: {
 
-  /*
-   * Position relative to globe.
-   * Keep this near the upper-right horizon.
-   */
-  offsetX: 0.30,
-  offsetY: -0.61,
+      offsetX: 0.30,
+      offsetY: -0.61,
 
-  /*
-   * Smaller than the current glow.
-   * This is NOT the large page atmosphere.
-   */
-  size: 0.94,
+      size: 0.94,
 
-  /*
-   * Enough blur to soften the edge,
-   * but not so much that it becomes
-   * a huge orange cloud.
-   */
-  blur: 22,
+      blur: 22,
 
-  opacity: 0.82,
+      opacity: 0.82,
 
-  gradient:
-    "radial-gradient(" +
-      "circle at center," +
-
-      "rgba(255,238,184,0.78) 0%," +
-
-      "rgba(255,194,120,0.55) 28%," +
-
-      "rgba(242,143,96,0.27) 52%," +
-
-      "rgba(226,118,96,0.09) 67%," +
-
-      "rgba(226,118,96,0) 79%" +
-    ")"
-},
+      gradient:
+        "radial-gradient(" +
+          "circle at center," +
+          "rgba(255,238,184,0.78) 0%," +
+          "rgba(255,194,120,0.55) 28%," +
+          "rgba(242,143,96,0.27) 52%," +
+          "rgba(226,118,96,0.09) 67%," +
+          "rgba(226,118,96,0) 79%" +
+        ")"
+    },
 
 
     /* =====================================================
@@ -291,11 +293,10 @@ bodyLit: [
 
       alert:
         '<svg viewBox="0 0 19 19" fill="none" xmlns="http://www.w3.org/2000/svg">' +
-          '<path d="M9.0865 16.6586C13.2685 16.6586 16.6586 13.2685 16.6586 9.0865C16.6586 4.90455 13.2685 1.5144 9.0865 1.5144C4.90455 1.5144 1.5144 4.90455 1.5144 9.0865C1.5144 13.2685 4.90455 16.6586 9.0865 16.6586Z" fill="#F06A45"/>' +
+          '<path d="M9.0865 16.6586C13.2685 16.6586 16.6586 13.2685 16.6586 9.0865C16.6586 4.90455 13.2685 1.5144 9.0865 1.5144C4.90455 1.5144 1.5144 4.90455 1.5144C1.5144 13.2685 4.90455 16.6586 9.0865 16.6586Z" fill="#F06A45"/>' +
           '<path d="M9.08655 6.05774V9.08658" stroke="black" stroke-width="1.51442" stroke-linecap="round"/>' +
           '<path d="M9.08655 12.1154H9.09371" stroke="black" stroke-width="1.51442" stroke-linecap="round"/>' +
         '</svg>',
-
 
       warning:
         '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">' +
@@ -366,6 +367,7 @@ bodyLit: [
         loc: [6.5244, 3.3792],
         sev: "low"
       }
+
     ],
 
 
@@ -425,10 +427,10 @@ bodyLit: [
      CREATE WARM BACK GLOW
   ===================================================== */
 
-var backGlow =
-  document.getElementById(
-    "sp-globe-glow"
-  );
+  var backGlow =
+    document.getElementById(
+      "sp-globe-glow"
+    );
 
 
   backGlow.style.position =
@@ -476,16 +478,13 @@ var backGlow =
         "div"
       );
 
-
     blurLayer.id =
       "sp-globe-blur";
-
 
     blurLayer.setAttribute(
       "aria-hidden",
       "true"
     );
-
 
     globeLayer.appendChild(
       blurLayer
@@ -555,7 +554,9 @@ var backGlow =
   var OPACITY = 1;
 
   var BLUR = 0;
+
   var GLOW_OPACITY = 1;
+
 
 
   /* =====================================================
@@ -643,11 +644,6 @@ var backGlow =
 
   /* =====================================================
      PRE-RENDERED GLOBE BODY
-
-     THIS IS THE IMPORTANT PART.
-
-     Blue atmosphere is generated as part of the body,
-     rather than a separate CSS halo.
   ===================================================== */
 
   var body =
@@ -780,10 +776,6 @@ var backGlow =
           Math.sqrt(r2);
 
 
-        /*
-         * Coverage of actual sphere.
-         */
-
         var coverage =
           (
             1 -
@@ -803,10 +795,6 @@ var backGlow =
           );
 
 
-        /*
-         * BLUE ATMOSPHERE OUTSIDE SPHERE.
-         */
-
         var atmosphere = 0;
 
 
@@ -824,10 +812,6 @@ var backGlow =
             ) /
             spread;
 
-
-          /*
-           * Smooth falloff.
-           */
 
           atmosphere =
             glowProgress *
@@ -881,10 +865,6 @@ var backGlow =
           );
 
 
-        /*
-         * Directional globe lighting.
-         */
-
         var diffuse =
           Math.max(
             0,
@@ -912,10 +892,6 @@ var backGlow =
             )
           );
 
-
-        /*
-         * Fresnel edge.
-         */
 
         var fresnel =
           Math.pow(
@@ -1017,10 +993,6 @@ var backGlow =
 
         }
 
-
-        /*
-         * Atmosphere uses the same blue as rim.
-         */
 
         pixels[index] =
           (
@@ -1615,11 +1587,6 @@ var backGlow =
             "low";
 
 
-          /*
-           * Small green dots are
-           * rendered on canvas.
-           */
-
           if (
             severity === "low" &&
             CFG.canvasDots
@@ -1697,8 +1664,7 @@ var backGlow =
 
   var scrollPitch = 0;
 
-  var globeExitStart = 0;
-  var globeExitEnd = 0;
+  var exitSectionTop = null;
 
 
 
@@ -1706,11 +1672,11 @@ var backGlow =
 
     anchors = [];
 
+    exitSectionTop = null;
+
 
     CFG.sections.forEach(
-      function (
-        section
-      ) {
+      function (section) {
 
         var element =
           document.querySelector(
@@ -1735,37 +1701,14 @@ var backGlow =
             .getBoundingClientRect()
             .top +
           window.pageYOffset;
-        if (
-  element.matches(
-    '[data-globe="2"]'
-  )
-) {
-
-  globeExitEnd =
-    top +
-    element.offsetHeight;
-
-
-  /*
-   * Start fading during the final
-   * 55% of one viewport.
-   *
-   * Example:
-   * 1000px viewport → 550px fade distance.
-   */
-  globeExitStart =
-    globeExitEnd -
-    VH * 0.55;
-
-}
 
 
         /*
-         * Section 2 may contain a tall
+         * The radial stats section has a long
          * scroll spacer.
          *
-         * Only use its first viewport
-         * for globe positioning.
+         * We ONLY use its first viewport
+         * for globe interpolation.
          */
 
         var anchorHeight =
@@ -1812,6 +1755,33 @@ var backGlow =
 
       }
     );
+
+
+    /*
+     * IMPORTANT:
+     *
+     * The globe exit now uses the START
+     * of your testimonial section.
+     *
+     * It no longer cares about the massive
+     * height of the radial stats section.
+     */
+
+    var exitNode =
+      document.querySelector(
+        CFG.sceneExit.selector
+      );
+
+
+    if (exitNode) {
+
+      exitSectionTop =
+        exitNode
+          .getBoundingClientRect()
+          .top +
+        window.pageYOffset;
+
+    }
 
   }
 
@@ -1863,6 +1833,101 @@ var backGlow =
 
 
 
+  /* =====================================================
+     TESTIMONIAL EXIT FADE
+  ===================================================== */
+
+  function applyExitVisibility(
+    scroll
+  ) {
+
+    if (
+      exitSectionTop ==
+      null
+    ) {
+
+      return;
+
+    }
+
+
+    var fadeDistance =
+      Math.max(
+        1,
+        CFG.sceneExit.fadeDistanceVh *
+        VH
+      );
+
+
+    /*
+     * The globe must be completely gone
+     * BEFORE testimonial_home enters.
+     */
+
+    var fadeEnd =
+      exitSectionTop -
+      VH -
+      CFG.sceneExit.endBeforeViewportVh *
+      VH;
+
+
+    var fadeStart =
+      fadeEnd -
+      fadeDistance;
+
+
+    var progress =
+      (
+        scroll -
+        fadeStart
+      ) /
+      fadeDistance;
+
+
+    progress =
+      Math.max(
+        0,
+        Math.min(
+          1,
+          progress
+        )
+      );
+
+
+    /*
+     * Smoothstep.
+     */
+
+    progress =
+      progress *
+      progress *
+      (
+        3 -
+        2 *
+        progress
+      );
+
+
+    var visibility =
+      1 -
+      progress;
+
+
+    OPACITY *=
+      visibility;
+
+
+    BLUR *=
+      visibility;
+
+
+    GLOW_OPACITY *=
+      visibility;
+
+  }
+
+
+
   function sampleScroll() {
 
     if (
@@ -1877,6 +1942,10 @@ var backGlow =
     var scroll =
       window.pageYOffset;
 
+
+    /*
+     * Safety if only one globe section exists.
+     */
 
     if (
       anchors.length === 1
@@ -1917,19 +1986,31 @@ var backGlow =
 
 
       OPACITY =
-  only.opacity;
+        only.opacity;
 
-BLUR =
-  only.blur;
 
-GLOW_OPACITY =
-  only.glowOpacity == null
-    ? 1
-    : only.glowOpacity;
+      BLUR =
+        only.blur;
 
-return;
+
+      GLOW_OPACITY =
+        only.glowOpacity ==
+        null
+          ?
+          1
+          :
+          only.glowOpacity;
+
+
+      applyExitVisibility(
+        scroll
+      );
+
+
+      return;
 
     }
+
 
 
     var index = 0;
@@ -2043,77 +2124,50 @@ return;
 
 
     OPACITY =
-  lerp(
-    A.config.opacity,
-    B.config.opacity,
-    progress
-  );
+      lerp(
+        A.config.opacity,
+        B.config.opacity,
+        progress
+      );
 
-BLUR =
-  lerp(
-    A.config.blur,
-    B.config.blur,
-    progress
-  );
 
-GLOW_OPACITY =
-  lerp(
-    A.config.glowOpacity == null ? 1 : A.config.glowOpacity,
-    B.config.glowOpacity == null ? 1 : B.config.glowOpacity,
-    progress
-  );
-  if (
-  globeExitEnd >
-  globeExitStart
-) {
+    BLUR =
+      lerp(
+        A.config.blur,
+        B.config.blur,
+        progress
+      );
 
-  var exitProgress =
-    (
-      scroll -
-      globeExitStart
-    ) /
-    (
-      globeExitEnd -
-      globeExitStart
+
+    GLOW_OPACITY =
+      lerp(
+
+        A.config.glowOpacity ==
+        null
+          ?
+          1
+          :
+          A.config.glowOpacity,
+
+        B.config.glowOpacity ==
+        null
+          ?
+          1
+          :
+          B.config.glowOpacity,
+
+        progress
+
+      );
+
+
+    /*
+     * THIS is the new exit.
+     */
+
+    applyExitVisibility(
+      scroll
     );
-
-
-  exitProgress =
-    Math.max(
-      0,
-      Math.min(
-        1,
-        exitProgress
-      )
-    );
-
-
-  /*
-   * Smooth fade instead of linear fade.
-   */
-  exitProgress =
-    ease(
-      exitProgress
-    );
-
-
-  var exitVisibility =
-    1 -
-    exitProgress;
-
-
-  OPACITY *=
-    exitVisibility;
-
-
-  BLUR *=
-    exitVisibility;
-
-
-  GLOW_OPACITY *=
-    exitVisibility;
-
-}  
 
   }
 
@@ -2412,6 +2466,11 @@ GLOW_OPACITY =
     frames++;
 
 
+    /*
+     * sampleScroll now includes
+     * testimonial exit visibility.
+     */
+
     sampleScroll();
 
 
@@ -2493,9 +2552,9 @@ GLOW_OPACITY =
     }
 
 
-    /*
-     * Warm glow follows globe.
-     */
+    /* =====================================================
+       WARM BACK GLOW
+    ===================================================== */
 
     backGlow.style.left =
       (
@@ -2531,17 +2590,19 @@ GLOW_OPACITY =
       "px";
 
 
-  backGlow.style.opacity =
-  (
-    CFG.backGlow.opacity *
-    GLOW_OPACITY
-  ).toFixed(3);
+    backGlow.style.opacity =
+      (
+        CFG.backGlow.opacity *
+        GLOW_OPACITY
+      ).toFixed(
+        3
+      );
 
 
-    /*
-     * Render dark globe + built-in
-     * blue atmospheric rim.
-     */
+
+    /* =====================================================
+       DRAW GLOBE BODY
+    ===================================================== */
 
     var bodyRadius =
       R *
@@ -2616,9 +2677,9 @@ GLOW_OPACITY =
       0.2;
 
 
-    /*
-     * Project land points.
-     */
+    /* =====================================================
+       PROJECT LAND POINTS
+    ===================================================== */
 
     for (
       var i = 0;
@@ -2703,11 +2764,6 @@ GLOW_OPACITY =
 
       }
 
-
-      /*
-       * Same directional lighting
-       * used by globe body.
-       */
 
       var lighting =
         (
@@ -3528,10 +3584,6 @@ GLOW_OPACITY =
       }
 
 
-      /*
-       * Canvas markers.
-       */
-
       if (
         markerDepth <=
         0.02
@@ -3645,6 +3697,7 @@ GLOW_OPACITY =
       }
 
 
+
       /*
        * Marker glow.
        */
@@ -3721,8 +3774,7 @@ GLOW_OPACITY =
 
 
       /*
-       * Don't draw the green center beneath
-       * warning/alert HTML icons.
+       * Green center only for low-severity dots.
        */
 
       if (
@@ -3772,6 +3824,10 @@ GLOW_OPACITY =
 
   measure();
 
+
+  /*
+   * Re-measure after Webflow/layout settles.
+   */
 
   setTimeout(
     measure,
