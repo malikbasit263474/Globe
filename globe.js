@@ -407,33 +407,10 @@ bodyLit: [
      CREATE WARM BACK GLOW
   ===================================================== */
 
-  var backGlow =
-    document.getElementById(
-      "sp-globe-back-glow"
-    );
-
-
-  if (!backGlow) {
-
-    backGlow =
-      document.createElement("div");
-
-
-    backGlow.id =
-      "sp-globe-back-glow";
-
-
-    backGlow.setAttribute(
-      "aria-hidden",
-      "true"
-    );
-
-
-    globeLayer.appendChild(
-      backGlow
-    );
-
-  }
+var backGlow =
+  document.getElementById(
+    "sp-globe-glow"
+  );
 
 
   backGlow.style.position =
@@ -447,9 +424,6 @@ bodyLit: [
 
   backGlow.style.borderRadius =
     "50%";
-
-  backGlow.style.transform =
-    "translate(-50%,-50%)";
 
   backGlow.style.filter =
     "blur(" +
