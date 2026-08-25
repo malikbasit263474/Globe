@@ -1697,6 +1697,9 @@ var backGlow =
 
   var scrollPitch = 0;
 
+  var globeExitStart = 0;
+  var globeExitEnd = 0;
+
 
 
   function measure() {
@@ -1732,6 +1735,29 @@ var backGlow =
             .getBoundingClientRect()
             .top +
           window.pageYOffset;
+        if (
+  element.matches(
+    '[data-globe="2"]'
+  )
+) {
+
+  globeExitEnd =
+    top +
+    element.offsetHeight;
+
+
+  /*
+   * Start fading during the final
+   * 55% of one viewport.
+   *
+   * Example:
+   * 1000px viewport → 550px fade distance.
+   */
+  globeExitStart =
+    globeExitEnd -
+    VH * 0.55;
+
+}
 
 
         /*
@@ -2036,6 +2062,58 @@ GLOW_OPACITY =
     B.config.glowOpacity == null ? 1 : B.config.glowOpacity,
     progress
   );
+  if (
+  globeExitEnd >
+  globeExitStart
+) {
+
+  var exitProgress =
+    (
+      scroll -
+      globeExitStart
+    ) /
+    (
+      globeExitEnd -
+      globeExitStart
+    );
+
+
+  exitProgress =
+    Math.max(
+      0,
+      Math.min(
+        1,
+        exitProgress
+      )
+    );
+
+
+  /*
+   * Smooth fade instead of linear fade.
+   */
+  exitProgress =
+    ease(
+      exitProgress
+    );
+
+
+  var exitVisibility =
+    1 -
+    exitProgress;
+
+
+  OPACITY *=
+    exitVisibility;
+
+
+  BLUR *=
+    exitVisibility;
+
+
+  GLOW_OPACITY *=
+    exitVisibility;
+
+}  
 
   }
 
