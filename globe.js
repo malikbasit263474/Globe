@@ -48,7 +48,32 @@
         glowOpacity: 0
       }
     ],
+mobile: {
+  breakpoint: 767,
 
+  /*
+   * Static position at bottom of hero.
+   */
+  cx: 0.50,
+  cy: 0.93,
+  r: 0.40,
+
+  yaw: 20,
+  pitch: -10,
+
+  /*
+   * Start fading only near the end
+   * of the hero.
+   */
+  fadeStart: 0.72,
+  fadeEnd: 0.96,
+
+  /*
+   * No directional blur / second-section glow.
+   */
+  blur: 0,
+  glowOpacity: 1
+},
 
     maxDpr: 2,
 
@@ -1658,22 +1683,62 @@
      SCROLL POSITIONING
   ===================================================== */
 
-  var anchors = [];
+var anchors = [];
 
-  var scrollYaw = 0;
+var scrollYaw = 0;
 
-  var scrollPitch = 0;
+var scrollPitch = 0;
 
-  var exitSectionTop = null;
+var exitSectionTop = null;
+
+var heroSectionTop = 0;
+var heroSectionHeight = 0;
 
 
+/* =====================================================
+   MOBILE CHECK
+===================================================== */
 
-  function measure() {
+function isMobileGlobe() {
 
-    anchors = [];
+  return (
+    window.innerWidth <=
+    CFG.mobile.breakpoint
+  );
 
-    exitSectionTop = null;
+}
 
+
+function measure() {
+
+  anchors = [];
+
+  exitSectionTop = null;
+
+
+  /* ===================================================
+     MEASURE HERO FOR MOBILE STATIC MODE
+  =================================================== */
+
+  var heroNode =
+    document.querySelector(
+      '[data-globe="1"]'
+    );
+
+
+  if (heroNode) {
+
+    heroSectionTop =
+      heroNode
+        .getBoundingClientRect()
+        .top +
+      window.pageYOffset;
+
+
+    heroSectionHeight =
+      heroNode.offsetHeight;
+
+  }
 
     CFG.sections.forEach(
       function (section) {
@@ -1930,173 +1995,53 @@
 
   function sampleScroll() {
 
-    if (
-      !anchors.length
-    ) {
+  if (
+    !anchors.length
+  ) {
 
-      return;
+    return;
 
-    }
-
-
-    var scroll =
-      window.pageYOffset;
+  }
 
 
-    /*
-     * Safety if only one globe section exists.
-     */
-
-    if (
-      anchors.length === 1
-    ) {
-
-      var only =
-        anchors[0].config;
-
-
-      CX =
-        only.cx *
-        VW;
-
-
-      CY =
-        only.cy *
-        VH;
-
-
-      R =
-        only.r *
-        Math.min(
-          VW,
-          VH
-        );
-
-
-      scrollYaw =
-        only.yaw *
-        Math.PI /
-        180;
-
-
-      scrollPitch =
-        only.pitch *
-        Math.PI /
-        180;
-
-
-      OPACITY =
-        only.opacity;
-
-
-      BLUR =
-        only.blur;
-
-
-      GLOW_OPACITY =
-        only.glowOpacity ==
-        null
-          ?
-          1
-          :
-          only.glowOpacity;
-
-
-      applyExitVisibility(
-        scroll
-      );
-
-
-      return;
-
-    }
+  var scroll =
+    window.pageYOffset;
 
 
 
-    var index = 0;
+  /* =====================================================
+     MOBILE
+
+     Globe does NOT interpolate into section 2.
+
+     It remains fixed at bottom of hero,
+     then fades away as hero finishes.
+  ===================================================== */
+
+  if (
+    isMobileGlobe()
+  ) {
+
+    var mobile =
+      CFG.mobile;
 
 
-    while (
-      index <
-      anchors.length -
-      2 &&
-      scroll >
-      anchors[
-        index + 1
-      ].y
-    ) {
-
-      index++;
-
-    }
-
-
-    var A =
-      anchors[index];
-
-
-    var B =
-      anchors[
-        index + 1
-      ];
-
-
-    var progress =
-      B.y >
-      A.y
-        ?
-        (
-          scroll -
-          A.y
-        ) /
-        (
-          B.y -
-          A.y
-        )
-        :
-        0;
-
-
-    progress =
-      Math.max(
-        0,
-        Math.min(
-          1,
-          progress
-        )
-      );
-
-
-    progress =
-      ease(
-        progress
-      );
-
+    /* -----------------------------------------------
+       STATIC POSITION
+    ----------------------------------------------- */
 
     CX =
-      lerp(
-        A.config.cx,
-        B.config.cx,
-        progress
-      ) *
+      mobile.cx *
       VW;
 
 
     CY =
-      lerp(
-        A.config.cy,
-        B.config.cy,
-        progress
-      ) *
+      mobile.cy *
       VH;
 
 
     R =
-      lerp(
-        A.config.r,
-        B.config.r,
-        progress
-      ) *
+      mobile.r *
       Math.min(
         VW,
         VH
@@ -2104,73 +2049,336 @@
 
 
     scrollYaw =
-      lerp(
-        A.config.yaw,
-        B.config.yaw,
-        progress
-      ) *
+      mobile.yaw *
       Math.PI /
       180;
 
 
     scrollPitch =
-      lerp(
-        A.config.pitch,
-        B.config.pitch,
-        progress
-      ) *
+      mobile.pitch *
+      Math.PI /
+      180;
+
+
+    BLUR =
+      mobile.blur;
+
+
+    GLOW_OPACITY =
+      mobile.glowOpacity;
+
+
+
+    /* -----------------------------------------------
+       HERO SCROLL PROGRESS
+    ----------------------------------------------- */
+
+    var heroProgress =
+      heroSectionHeight > 0
+        ?
+        (
+          scroll -
+          heroSectionTop
+        ) /
+        heroSectionHeight
+        :
+        0;
+
+
+    heroProgress =
+      Math.max(
+        0,
+        Math.min(
+          1,
+          heroProgress
+        )
+      );
+
+
+
+    /* -----------------------------------------------
+       FADE NEAR END OF HERO
+    ----------------------------------------------- */
+
+    var fadeProgress =
+      (
+        heroProgress -
+        mobile.fadeStart
+      ) /
+      (
+        mobile.fadeEnd -
+        mobile.fadeStart
+      );
+
+
+    fadeProgress =
+      Math.max(
+        0,
+        Math.min(
+          1,
+          fadeProgress
+        )
+      );
+
+
+    /*
+     * Smoothstep
+     */
+    fadeProgress =
+      fadeProgress *
+      fadeProgress *
+      (
+        3 -
+        2 *
+        fadeProgress
+      );
+
+
+    OPACITY =
+      1 -
+      fadeProgress;
+
+
+    GLOW_OPACITY *=
+      OPACITY;
+
+
+    /*
+     * Important:
+     * stop here.
+     *
+     * Desktop radial interpolation
+     * must NEVER execute on mobile.
+     */
+    return;
+
+  }
+
+
+
+  /* =====================================================
+     DESKTOP / TABLET
+
+     Existing radial section interpolation.
+  ===================================================== */
+
+  if (
+    anchors.length === 1
+  ) {
+
+    var only =
+      anchors[0].config;
+
+
+    CX =
+      only.cx *
+      VW;
+
+
+    CY =
+      only.cy *
+      VH;
+
+
+    R =
+      only.r *
+      Math.min(
+        VW,
+        VH
+      );
+
+
+    scrollYaw =
+      only.yaw *
+      Math.PI /
+      180;
+
+
+    scrollPitch =
+      only.pitch *
       Math.PI /
       180;
 
 
     OPACITY =
-      lerp(
-        A.config.opacity,
-        B.config.opacity,
-        progress
-      );
+      only.opacity;
 
 
     BLUR =
-      lerp(
-        A.config.blur,
-        B.config.blur,
-        progress
-      );
+      only.blur;
 
 
     GLOW_OPACITY =
-      lerp(
+      only.glowOpacity == null
+        ?
+        1
+        :
+        only.glowOpacity;
 
-        A.config.glowOpacity ==
-        null
-          ?
-          1
-          :
-          A.config.glowOpacity,
-
-        B.config.glowOpacity ==
-        null
-          ?
-          1
-          :
-          B.config.glowOpacity,
-
-        progress
-
-      );
-
-
-    /*
-     * THIS is the new exit.
-     */
 
     applyExitVisibility(
       scroll
     );
 
+
+    return;
+
   }
 
+
+
+  var index =
+    0;
+
+
+  while (
+    index <
+    anchors.length -
+    2 &&
+    scroll >
+    anchors[
+      index + 1
+    ].y
+  ) {
+
+    index++;
+
+  }
+
+
+  var A =
+    anchors[index];
+
+
+  var B =
+    anchors[
+      index + 1
+    ];
+
+
+  var progress =
+    B.y >
+    A.y
+      ?
+      (
+        scroll -
+        A.y
+      ) /
+      (
+        B.y -
+        A.y
+      )
+      :
+      0;
+
+
+  progress =
+    Math.max(
+      0,
+      Math.min(
+        1,
+        progress
+      )
+    );
+
+
+  progress =
+    ease(
+      progress
+    );
+
+
+  CX =
+    lerp(
+      A.config.cx,
+      B.config.cx,
+      progress
+    ) *
+    VW;
+
+
+  CY =
+    lerp(
+      A.config.cy,
+      B.config.cy,
+      progress
+    ) *
+    VH;
+
+
+  R =
+    lerp(
+      A.config.r,
+      B.config.r,
+      progress
+    ) *
+    Math.min(
+      VW,
+      VH
+    );
+
+
+  scrollYaw =
+    lerp(
+      A.config.yaw,
+      B.config.yaw,
+      progress
+    ) *
+    Math.PI /
+    180;
+
+
+  scrollPitch =
+    lerp(
+      A.config.pitch,
+      B.config.pitch,
+      progress
+    ) *
+    Math.PI /
+    180;
+
+
+  OPACITY =
+    lerp(
+      A.config.opacity,
+      B.config.opacity,
+      progress
+    );
+
+
+  BLUR =
+    lerp(
+      A.config.blur,
+      B.config.blur,
+      progress
+    );
+
+
+  GLOW_OPACITY =
+    lerp(
+
+      A.config.glowOpacity == null
+        ?
+        1
+        :
+        A.config.glowOpacity,
+
+      B.config.glowOpacity == null
+        ?
+        1
+        :
+        B.config.glowOpacity,
+
+      progress
+
+    );
+
+
+  applyExitVisibility(
+    scroll
+  );
+
+}
 
 
   /* =====================================================
