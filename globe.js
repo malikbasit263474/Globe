@@ -69,16 +69,17 @@
     ===================================================== */
 
     bodyDark: [
-      26,
-      10,
-      58
-    ],
+  45,
+  39,
+  82
+],
 
-    bodyLit: [
-      52,
-      44,
-      190
-    ],
+/* slightly lighter than #2D2752 so the globe still has depth */
+bodyLit: [
+  68,
+  60,
+  112
+],
 
     /*
      * Blue atmospheric rim.
@@ -221,29 +222,24 @@
 
     backGlow: {
 
-      offsetX: 0.30,
+  offsetX: 0.24,
+  offsetY: -0.58,
 
-      offsetY: -0.62,
+  size: 1.18,
 
-      size: 1.05,
+  blur: 28,
 
-      blur: 18,
+  opacity: 1,
 
-      opacity: 1,
-
-      gradient:
-        "radial-gradient(" +
-          "circle at center," +
-
-          "rgba(255,235,164,1) 0%," +
-
-          "rgba(255,179,105,.84) 34%," +
-
-          "rgba(238,119,91,.38) 58%," +
-
-          "rgba(226,120,105,0) 76%" +
-        ")"
-    },
+  gradient:
+    "radial-gradient(" +
+      "circle at center," +
+      "rgba(255,232,170,0.98) 0%," +
+      "rgba(255,191,120,0.78) 32%," +
+      "rgba(238,133,96,0.34) 58%," +
+      "rgba(226,120,105,0) 78%" +
+    ")"
+},
 
 
     /* =====================================================
