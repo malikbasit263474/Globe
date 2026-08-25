@@ -70,17 +70,16 @@
        THESE VALUES CREATE YOUR FRIEND'S BLUE ATMOSPHERE.
     ===================================================== */
 
-    bodyDark: [
-  45,
-  39,
-  82
+   bodyDark: [
+  46,
+  41,
+  86
 ],
 
-/* slightly lighter than #2D2752 so the globe still has depth */
 bodyLit: [
-  68,
-  60,
-  112
+  58,
+  52,
+  98
 ],
 
     /*
@@ -222,24 +221,25 @@ bodyLit: [
        WARM ORANGE GLOW BEHIND GLOBE
     ===================================================== */
 
-    backGlow: {
+   backGlow: {
 
-  offsetX: 0.24,
-  offsetY: -0.58,
+  offsetX: 0.22,
+  offsetY: -0.57,
 
-  size: 1.18,
+  size: 1.14,
 
-  blur: 28,
+  blur: 36,
 
   opacity: 1,
 
   gradient:
     "radial-gradient(" +
       "circle at center," +
-      "rgba(255,232,170,0.98) 0%," +
-      "rgba(255,191,120,0.78) 32%," +
-      "rgba(238,133,96,0.34) 58%," +
-      "rgba(226,120,105,0) 78%" +
+      "rgba(255,236,178,0.78) 0%," +
+      "rgba(255,201,130,0.52) 24%," +
+      "rgba(245,156,104,0.26) 48%," +
+      "rgba(233,130,101,0.10) 64%," +
+      "rgba(233,130,101,0) 80%" +
     ")"
 },
 
