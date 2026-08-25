@@ -223,23 +223,41 @@ bodyLit: [
 
    backGlow: {
 
-  offsetX: 0.22,
-  offsetY: -0.57,
+  /*
+   * Position relative to globe.
+   * Keep this near the upper-right horizon.
+   */
+  offsetX: 0.30,
+  offsetY: -0.61,
 
-  size: 1.14,
+  /*
+   * Smaller than the current glow.
+   * This is NOT the large page atmosphere.
+   */
+  size: 0.94,
 
-  blur: 36,
+  /*
+   * Enough blur to soften the edge,
+   * but not so much that it becomes
+   * a huge orange cloud.
+   */
+  blur: 22,
 
-  opacity: 1,
+  opacity: 0.82,
 
   gradient:
     "radial-gradient(" +
       "circle at center," +
-      "rgba(255,236,178,0.78) 0%," +
-      "rgba(255,201,130,0.52) 24%," +
-      "rgba(245,156,104,0.26) 48%," +
-      "rgba(233,130,101,0.10) 64%," +
-      "rgba(233,130,101,0) 80%" +
+
+      "rgba(255,238,184,0.78) 0%," +
+
+      "rgba(255,194,120,0.55) 28%," +
+
+      "rgba(242,143,96,0.27) 52%," +
+
+      "rgba(226,118,96,0.09) 67%," +
+
+      "rgba(226,118,96,0) 79%" +
     ")"
 },
 
