@@ -111,13 +111,26 @@
       },
 
 
-      cool: {
-        core: [177, 201, 255],
-        middle: [86, 116, 255],
-        edge: [49, 59, 204]
-      }
-
+       cool: {
+    core: [188, 206, 255],
+    middle: [104, 126, 255],
+    edge: [62, 76, 214]
+  }
     },
+    
+    atmosphere: {
+  color: [105, 126, 255],
+  cyan: [156, 224, 255],
+
+  heroOpacity: 0.16,
+  statsOpacity: 0.48,
+
+  heroSpread: 1.035,
+  statsSpread: 1.085,
+
+  rimHeroOpacity: 0.16,
+  rimStatsOpacity: 0.46
+},
 
 
     /* Globe locations / warnings */
@@ -1194,7 +1207,259 @@
 
   }
 
+/* =======================================================
+   BLUE ATMOSPHERE / RIM
+======================================================= */
 
+function drawAtmosphere() {
+
+  var atmosphere =
+    CONFIG.atmosphere;
+
+  if (!atmosphere) return;
+
+
+  var progress =
+    smoothstep(moveProgress);
+
+
+  /*
+   * Atmosphere becomes stronger
+   * as globe enters section 2.
+   */
+
+  var opacity =
+    lerp(
+      atmosphere.heroOpacity,
+      atmosphere.statsOpacity,
+      progress
+    );
+
+
+  var spread =
+    lerp(
+      atmosphere.heroSpread,
+      atmosphere.statsSpread,
+      progress
+    );
+
+
+  var rimOpacity =
+    lerp(
+      atmosphere.rimHeroOpacity,
+      atmosphere.rimStatsOpacity,
+      progress
+    );
+
+
+  var outerRadius =
+    globeRadius * spread;
+
+
+  ctx.save();
+
+
+  /*
+   * Screen blend keeps the glow luminous
+   * without turning it into a solid blue circle.
+   */
+
+  ctx.globalCompositeOperation =
+    "screen";
+
+
+  /* =========================================
+     SOFT OUTER BLUE ATMOSPHERE
+  ========================================= */
+
+  var halo =
+    ctx.createRadialGradient(
+
+      globeX,
+      globeY,
+      globeRadius * 0.86,
+
+      globeX,
+      globeY,
+      outerRadius
+
+    );
+
+
+  halo.addColorStop(
+    0,
+    "rgba(" +
+      rgb(atmosphere.color) +
+      ",0)"
+  );
+
+
+  halo.addColorStop(
+    0.42,
+    "rgba(" +
+      rgb(atmosphere.color) +
+      "," +
+      (opacity * 0.18).toFixed(3) +
+      ")"
+  );
+
+
+  halo.addColorStop(
+    0.70,
+    "rgba(" +
+      rgb(atmosphere.color) +
+      "," +
+      (opacity * 0.58).toFixed(3) +
+      ")"
+  );
+
+
+  halo.addColorStop(
+    0.88,
+    "rgba(" +
+      rgb(atmosphere.cyan) +
+      "," +
+      (opacity * 0.34).toFixed(3) +
+      ")"
+  );
+
+
+  halo.addColorStop(
+    1,
+    "rgba(" +
+      rgb(atmosphere.color) +
+      ",0)"
+  );
+
+
+  ctx.fillStyle =
+    halo;
+
+
+  ctx.beginPath();
+
+
+  ctx.arc(
+    globeX,
+    globeY,
+    outerRadius,
+    0,
+    Math.PI * 2
+  );
+
+
+  ctx.fill();
+
+
+
+  /* =========================================
+     BLUE / CYAN HORIZON RIM
+  ========================================= */
+
+  var rim =
+    ctx.createLinearGradient(
+
+      globeX - globeRadius,
+      globeY - globeRadius * 0.35,
+
+      globeX + globeRadius,
+      globeY + globeRadius * 0.25
+
+    );
+
+
+  /*
+   * Brighter cyan on left/top.
+   * Fades toward right side where warm
+   * orange lighting already exists.
+   */
+
+  rim.addColorStop(
+    0,
+    "rgba(" +
+      rgb(atmosphere.cyan) +
+      "," +
+      (rimOpacity * 0.95).toFixed(3) +
+      ")"
+  );
+
+
+  rim.addColorStop(
+    0.42,
+    "rgba(" +
+      rgb(atmosphere.color) +
+      "," +
+      (rimOpacity * 0.58).toFixed(3) +
+      ")"
+  );
+
+
+  rim.addColorStop(
+    0.72,
+    "rgba(" +
+      rgb(atmosphere.color) +
+      "," +
+      (rimOpacity * 0.22).toFixed(3) +
+      ")"
+  );
+
+
+  rim.addColorStop(
+    1,
+    "rgba(" +
+      rgb(atmosphere.color) +
+      ",0)"
+  );
+
+
+  ctx.beginPath();
+
+
+  ctx.arc(
+    globeX,
+    globeY,
+    globeRadius * 1.006,
+    0,
+    Math.PI * 2
+  );
+
+
+  ctx.lineWidth =
+    Math.max(
+      2,
+      globeRadius * 0.012
+    );
+
+
+  ctx.strokeStyle =
+    rim;
+
+
+  /*
+   * Soft bloom outside horizon.
+   */
+
+  ctx.shadowColor =
+    "rgba(" +
+      rgb(atmosphere.color) +
+      "," +
+      (opacity * 0.80).toFixed(3) +
+      ")";
+
+
+  ctx.shadowBlur =
+    Math.max(
+      14,
+      globeRadius * 0.055
+    );
+
+
+  ctx.stroke();
+
+
+  ctx.restore();
+
+}
 
   /* =======================================================
      15 — DRAW GLOBE BODY
@@ -2093,14 +2358,18 @@
 
     renderGlow();
 
+/*
+ * Blue atmospheric layer
+ * sits behind the globe.
+ */
+drawAtmosphere();
 
-    drawBody();
+drawBody();
 
-
-    drawLandDots(
-      yaw,
-      pitch
-    );
+drawLandDots(
+  yaw,
+  pitch
+);
 
 
     drawArcs(
