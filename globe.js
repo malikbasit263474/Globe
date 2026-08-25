@@ -18,34 +18,36 @@
      */
 
     sections: [
-      {
-        sel: '[data-globe="1"]',
+  {
+    sel: '[data-globe="1"]',
 
-        cx: 0.50,
-        cy: 1.13,
-        r: 0.50,
+    cx: 0.50,
+    cy: 1.13,
+    r: 0.50,
 
-        yaw: 20,
-        pitch: -10,
+    yaw: 20,
+    pitch: -10,
 
-        opacity: 1,
-        blur: 0
-      },
+    opacity: 1,
+    blur: 0,
+    glowOpacity: 1
+  },
 
-      {
-        sel: '[data-globe="2"]',
+  {
+    sel: '[data-globe="2"]',
 
-        cx: 0.12,
-        cy: 0.72,
-        r: 0.40,
+    cx: 0.12,
+    cy: 0.72,
+    r: 0.40,
 
-        yaw: 110,
-        pitch: 14,
+    yaw: 110,
+    pitch: 14,
 
-        opacity: 1,
-        blur: 1
-      }
-    ],
+    opacity: 1,
+    blur: 1,
+    glowOpacity: 0
+  }
+],
 
 
     maxDpr: 2,
@@ -561,7 +563,7 @@ bodyLit: [
   var OPACITY = 1;
 
   var BLUR = 0;
-
+  var GLOW_OPACITY = 1;
 
 
   /* =====================================================
@@ -1897,14 +1899,17 @@ bodyLit: [
 
 
       OPACITY =
-        only.opacity;
+  only.opacity;
 
+BLUR =
+  only.blur;
 
-      BLUR =
-        only.blur;
+GLOW_OPACITY =
+  only.glowOpacity == null
+    ? 1
+    : only.glowOpacity;
 
-
-      return;
+return;
 
     }
 
@@ -2020,19 +2025,25 @@ bodyLit: [
 
 
     OPACITY =
-      lerp(
-        A.config.opacity,
-        B.config.opacity,
-        progress
-      );
+  lerp(
+    A.config.opacity,
+    B.config.opacity,
+    progress
+  );
 
+BLUR =
+  lerp(
+    A.config.blur,
+    B.config.blur,
+    progress
+  );
 
-    BLUR =
-      lerp(
-        A.config.blur,
-        B.config.blur,
-        progress
-      );
+GLOW_OPACITY =
+  lerp(
+    A.config.glowOpacity == null ? 1 : A.config.glowOpacity,
+    B.config.glowOpacity == null ? 1 : B.config.glowOpacity,
+    progress
+  );
 
   }
 
@@ -2450,8 +2461,11 @@ bodyLit: [
       "px";
 
 
-    backGlow.style.opacity =
-      CFG.backGlow.opacity;
+  backGlow.style.opacity =
+  (
+    CFG.backGlow.opacity *
+    GLOW_OPACITY
+  ).toFixed(3);
 
 
     /*
