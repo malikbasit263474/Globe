@@ -1,32 +1,26 @@
 (function () {
   "use strict";
 
-  /* =========================================================
-     MOBILE ONLY
-  ========================================================= */
-
-  if (
-    !window.matchMedia(
+  const mobile =
+    window.matchMedia(
       "(max-width: 767px)"
-    ).matches
-  ) {
-    return;
-  }
+    ).matches;
 
 
   /* =========================================================
      CONFIG
-
-     Same visual appearance as desktop.
   ========================================================= */
 
   const CONFIG = {
 
-    dotSize: 4.5,
+    dotSize:
+      4.5,
 
-    pitch: 8,
+    pitch:
+      8,
 
-    idleColor: [
+
+    idle: [
       221,
       209,
       191
@@ -35,11 +29,13 @@
     idleOpacity:
       0.40,
 
-    activeColor: [
+
+    active: [
       99,
       116,
       243
     ],
+
 
     radiusX:
       122,
@@ -48,17 +44,10 @@
       84,
 
 
-    /*
-     * Same follow feeling as desktop.
-     */
     follow:
       0.21,
 
 
-    /*
-     * Approximate same desktop
-     * GSAP enter / leave timing.
-     */
     enterSpeed:
       0.18,
 
@@ -67,51 +56,60 @@
 
 
     /*
-     * Major mobile optimization.
+     * Desktop keeps quality.
+     * Mobile renders lighter.
      */
     maxDpr:
-      1.25,
+      mobile
+        ? 1.25
+        : 1.5,
 
 
     /*
-     * Mobile doesn't need 60fps
-     * for this soft effect.
+     * Desktop smooth.
+     * Mobile lighter.
      */
     fps:
-      30,
+      mobile
+        ? 30
+        : 60,
 
 
     /*
-     * Fewer opacity groups than desktop.
-     *
-     * Visually almost identical,
-     * cheaper to draw.
+     * Same smooth opacity effect.
      */
     buckets:
-      8
+      mobile
+        ? 8
+        : 12
 
   };
 
 
   /* =========================================================
-     GLOBAL STATE
+     GLOBAL
   ========================================================= */
 
   const states =
     [];
 
 
-  let running =
-    false;
+  let raf =
+    0;
 
 
-  let lastFrame =
+  let lastTime =
     0;
 
 
   const frameInterval =
     1000 /
     CONFIG.fps;
+
+
+  const TAU =
+    Math.PI *
+    2;
 
 
   /* =========================================================
@@ -160,16 +158,83 @@
   }
 
 
+  function startLoop() {
+
+    if (!raf) {
+
+      raf =
+        requestAnimationFrame(
+          loop
+        );
+
+    }
+
+  }
+
+
+  /* =========================================================
+     POINTER
+  ========================================================= */
+
+  function updatePointer(
+    state,
+    event
+  ) {
+
+    const rect =
+      state.surface
+        .getBoundingClientRect();
+
+
+    if (
+      !rect.width ||
+      !rect.height
+    ) {
+      return;
+    }
+
+
+    state.targetX =
+      (
+        event.clientX -
+        rect.left
+      ) *
+      (
+        state.width /
+        rect.width
+      );
+
+
+    state.targetY =
+      (
+        event.clientY -
+        rect.top
+      ) *
+      (
+        state.height /
+        rect.height
+      );
+
+
+    state.dirty =
+      true;
+
+
+    startLoop();
+
+  }
+
+
   /* =========================================================
      CREATE CARD
   ========================================================= */
 
-  function createCard(
+  function buildCard(
     card
   ) {
 
     if (
-      card.__mobileMetricDots
+      card.__metricDotsReady
     ) {
       return;
     }
@@ -186,13 +251,10 @@
     }
 
 
-    card.__mobileMetricDots =
+    card.__metricDotsReady =
       true;
 
 
-    /*
-     * Remove old dot DOM implementation.
-     */
     surface.innerHTML =
       "";
 
@@ -289,17 +351,16 @@
         1,
 
 
-      targetX:
-        0,
-
-      targetY:
-        0,
-
-
       focusX:
         0,
 
       focusY:
+        0,
+
+      targetX:
+        0,
+
+      targetY:
         0,
 
 
@@ -310,7 +371,10 @@
         0,
 
 
-      interacting:
+      hovering:
+        false,
+
+      touching:
         false,
 
       visible:
@@ -320,16 +384,119 @@
         true,
 
 
-      /*
-       * Precomputed grid positions.
-       */
+      releaseTimer:
+        0,
+
+
       gridX:
         [],
 
       gridY:
-        []
+        [],
+
+
+      buckets:
+        Array.from(
+          {
+            length:
+              CONFIG.buckets
+          },
+          function () {
+            return [];
+          }
+        )
 
     };
+
+
+    states.push(
+      state
+    );
+
+
+    /* =====================================================
+       IDLE DOT GRID
+    ===================================================== */
+
+    function drawIdle() {
+
+      const radius =
+        CONFIG.dotSize /
+        2;
+
+
+      idleCtx.clearRect(
+        0,
+        0,
+        state.width,
+        state.height
+      );
+
+
+      idleCtx.fillStyle =
+        "rgba(" +
+        CONFIG.idle[0] +
+        "," +
+        CONFIG.idle[1] +
+        "," +
+        CONFIG.idle[2] +
+        "," +
+        CONFIG.idleOpacity +
+        ")";
+
+
+      idleCtx.beginPath();
+
+
+      for (
+        let yIndex = 0;
+        yIndex <
+        state.gridY.length;
+        yIndex++
+      ) {
+
+        const y =
+          state.gridY[
+            yIndex
+          ];
+
+
+        for (
+          let xIndex = 0;
+          xIndex <
+          state.gridX.length;
+          xIndex++
+        ) {
+
+          const x =
+            state.gridX[
+              xIndex
+            ];
+
+
+          idleCtx.moveTo(
+            x +
+            radius,
+            y
+          );
+
+
+          idleCtx.arc(
+            x,
+            y,
+            radius,
+            0,
+            TAU
+          );
+
+        }
+
+      }
+
+
+      idleCtx.fill();
+
+  }
 
 
     /* =====================================================
@@ -339,7 +506,8 @@
     function resize() {
 
       const rect =
-        surface.getBoundingClientRect();
+        surface
+          .getBoundingClientRect();
 
 
       const width =
@@ -390,10 +558,6 @@
         dpr;
 
 
-      /* ===================================================
-         MAIN CANVAS
-      =================================================== */
-
       canvas.width =
         Math.round(
           width *
@@ -428,10 +592,6 @@
       );
 
 
-      /* ===================================================
-         IDLE CANVAS
-      =================================================== */
-
       idleCanvas.width =
         canvas.width;
 
@@ -449,13 +609,6 @@
         0
       );
 
-
-      /* ===================================================
-         PRECOMPUTE GRID
-
-         These positions never change unless
-         the card resizes.
-      =================================================== */
 
       state.gridX.length =
         0;
@@ -495,25 +648,19 @@
       }
 
 
-      drawIdleGrid();
+      drawIdle();
 
 
       state.focusX =
-        width *
-        0.5;
+        state.targetX =
+          width *
+          0.5;
 
 
       state.focusY =
-        height *
-        0.5;
-
-
-      state.targetX =
-        state.focusX;
-
-
-      state.targetY =
-        state.focusY;
+        state.targetY =
+          height *
+          0.5;
 
 
       state.dirty =
@@ -526,179 +673,63 @@
 
 
     /* =====================================================
-       IDLE GRID
+       DESKTOP STRENGTH
 
-       Drawn ONCE.
+       Uses your existing GSAP when available,
+       preserving the desktop feel.
     ===================================================== */
 
-    function drawIdleGrid() {
-
-      const radius =
-        CONFIG.dotSize /
-        2;
-
-
-      idleCtx.clearRect(
-        0,
-        0,
-        state.width,
-        state.height
-      );
-
-
-      idleCtx.fillStyle =
-        "rgba(" +
-        CONFIG.idleColor[0] +
-        "," +
-        CONFIG.idleColor[1] +
-        "," +
-        CONFIG.idleColor[2] +
-        "," +
-        CONFIG.idleOpacity +
-        ")";
-
-
-      idleCtx.beginPath();
-
-
-      for (
-        let yi = 0;
-        yi <
-        state.gridY.length;
-        yi++
-      ) {
-
-        const y =
-          state.gridY[
-            yi
-          ];
-
-
-        for (
-          let xi = 0;
-          xi <
-          state.gridX.length;
-          xi++
-        ) {
-
-          const x =
-            state.gridX[
-              xi
-            ];
-
-
-          idleCtx.moveTo(
-            x +
-            radius,
-            y
-          );
-
-
-          idleCtx.arc(
-            x,
-            y,
-            radius,
-            0,
-            Math.PI *
-            2
-          );
-
-        }
-
-      }
-
-
-      idleCtx.fill();
-
-    }
-
-
-    /* =====================================================
-       POINTER POSITION
-    ===================================================== */
-
-    function updatePointer(
-      event
+    function desktopStrength(
+      value,
+      duration
     ) {
 
-      const rect =
-        surface.getBoundingClientRect();
+      state.targetStrength =
+        value;
 
 
       if (
-        !rect.width ||
-        !rect.height
-      ) {
-        return;
-      }
-
-
-      state.targetX =
-        (
-          event.clientX -
-          rect.left
-        ) *
-        (
-          state.width /
-          rect.width
-        );
-
-
-      state.targetY =
-        (
-          event.clientY -
-          rect.top
-        ) *
-        (
-          state.height /
-          rect.height
-        );
-
-
-      state.dirty =
-        true;
-
-
-      startLoop();
-
-    }
-
-
-    /* =====================================================
-       POINTER DOWN
-
-       Mobile equivalent of hover entering.
-    ===================================================== */
-
-    card.addEventListener(
-      "pointerdown",
-      function (
-        event
+        window.gsap
       ) {
 
-        state.interacting =
-          true;
+        window.gsap
+          .killTweensOf(
+            state,
+            "strength"
+          );
 
 
-        updatePointer(
-          event
+        window.gsap.to(
+          state,
+          {
+
+            strength:
+              value,
+
+            duration:
+              duration,
+
+            ease:
+              "power2.out",
+
+            overwrite:
+              true,
+
+            onUpdate:
+              function () {
+
+                state.dirty =
+                  true;
+
+
+                startLoop();
+
+              }
+
+          }
         );
 
-
-        /*
-         * Start exactly where finger lands.
-         */
-        state.focusX =
-          state.targetX;
-
-
-        state.focusY =
-          state.targetY;
-
-
-        state.targetStrength =
-          1;
-
+      } else {
 
         state.dirty =
           true;
@@ -706,134 +737,195 @@
 
         startLoop();
 
-      },
-      {
-        passive: true
       }
-    );
-
-
-    /* =====================================================
-       POINTER MOVE
-    ===================================================== */
-
-    card.addEventListener(
-      "pointermove",
-      function (
-        event
-      ) {
-
-        if (
-          !state.interacting
-        ) {
-          return;
-        }
-
-
-        updatePointer(
-          event
-        );
-
-      },
-      {
-        passive: true
-      }
-    );
-
-
-    /* =====================================================
-       POINTER RELEASE
-
-       Same smooth fade-out as desktop.
-    ===================================================== */
-
-    function release() {
-
-      if (
-        !state.interacting &&
-        state.targetStrength ===
-        0
-      ) {
-        return;
-      }
-
-
-      state.interacting =
-        false;
-
-
-      state.targetStrength =
-        0;
-
-
-      state.dirty =
-        true;
-
-
-      startLoop();
 
     }
 
 
-    card.addEventListener(
-      "pointerup",
-      release,
-      {
-        passive: true
-      }
-    );
+    /* =====================================================
+       DESKTOP
+    ===================================================== */
+
+    if (!mobile) {
+
+      card.addEventListener(
+        "pointerenter",
+        function (
+          event
+        ) {
+
+          state.hovering =
+            true;
 
 
-    card.addEventListener(
-      "pointercancel",
-      release,
-      {
-        passive: true
-      }
-    );
+          updatePointer(
+            state,
+            event
+          );
 
 
-    card.addEventListener(
-      "pointerleave",
-      release,
-      {
-        passive: true
-      }
-    );
+          state.focusX =
+            state.targetX;
+
+
+          state.focusY =
+            state.targetY;
+
+
+          desktopStrength(
+            1,
+            CONFIG.enterSpeed
+          );
+
+        }
+      );
+
+
+      card.addEventListener(
+        "pointermove",
+        function (
+          event
+        ) {
+
+          if (
+            !state.hovering
+          ) {
+            return;
+          }
+
+
+          updatePointer(
+            state,
+            event
+          );
+
+        }
+      );
+
+
+      card.addEventListener(
+        "pointerleave",
+        function () {
+
+          state.hovering =
+            false;
+
+
+          desktopStrength(
+            0,
+            CONFIG.leaveSpeed
+          );
+
+        }
+      );
+
+    }
 
 
     /* =====================================================
-       VISIBILITY
+       MOBILE
 
-       Offscreen cards cost 0 rendering.
+       Same visual blue region,
+       follows finger.
     ===================================================== */
 
-    if (
-      "IntersectionObserver" in
-      window
-    ) {
+    else {
 
-      const observer =
-        new IntersectionObserver(
-          function (
-            entries
+      card.addEventListener(
+        "pointerdown",
+        function (
+          event
+        ) {
+
+          clearTimeout(
+            state.releaseTimer
+          );
+
+
+          state.touching =
+            true;
+
+
+          updatePointer(
+            state,
+            event
+          );
+
+
+          state.focusX =
+            state.targetX;
+
+
+          state.focusY =
+            state.targetY;
+
+
+          state.targetStrength =
+            1;
+
+
+          state.dirty =
+            true;
+
+
+          startLoop();
+
+        },
+        {
+          passive:
+            true
+        }
+      );
+
+
+      card.addEventListener(
+        "pointermove",
+        function (
+          event
+        ) {
+
+          if (
+            !state.touching
           ) {
-
-            if (
-              !entries.length
-            ) {
-              return;
-            }
+            return;
+          }
 
 
-            state.visible =
-              entries[0]
-                .isIntersecting;
+          updatePointer(
+            state,
+            event
+          );
+
+        },
+        {
+          passive:
+            true
+        }
+      );
 
 
-            if (
-              state.visible
-            ) {
+      function release() {
+
+        state.touching =
+          false;
+
+
+        clearTimeout(
+          state.releaseTimer
+        );
+
+
+        /*
+         * Small linger so a tap
+         * is actually visible.
+         */
+        state.releaseTimer =
+          setTimeout(
+            function () {
+
+              state.targetStrength =
+                0;
+
 
               state.dirty =
                 true;
@@ -841,25 +933,47 @@
 
               startLoop();
 
-            }
+            },
+            120
+          );
 
-          },
-          {
-            rootMargin:
-              "100px 0px"
-          }
-        );
+      }
 
 
-      observer.observe(
-        card
+      card.addEventListener(
+        "pointerup",
+        release,
+        {
+          passive:
+            true
+        }
+      );
+
+
+      card.addEventListener(
+        "pointercancel",
+        release,
+        {
+          passive:
+            true
+        }
+      );
+
+
+      card.addEventListener(
+        "pointerleave",
+        release,
+        {
+          passive:
+            true
+        }
       );
 
     }
 
 
     /* =====================================================
-       RESIZE
+       RESIZE OBSERVER
     ===================================================== */
 
     if (
@@ -867,14 +981,66 @@
       window
     ) {
 
-      const resizeObserver =
-        new ResizeObserver(
-          resize
-        );
-
-
-      resizeObserver.observe(
+      new ResizeObserver(
+        resize
+      ).observe(
         surface
+      );
+
+    } else {
+
+      window.addEventListener(
+        "resize",
+        resize,
+        {
+          passive:
+            true
+        }
+      );
+
+    }
+
+
+    /* =====================================================
+       VISIBILITY
+
+       Cards offscreen stop rendering.
+    ===================================================== */
+
+    if (
+      "IntersectionObserver" in
+      window
+    ) {
+
+      new IntersectionObserver(
+        function (
+          entries
+        ) {
+
+          state.visible =
+            !!entries[0]
+              ?.isIntersecting;
+
+
+          if (
+            state.visible
+          ) {
+
+            state.dirty =
+              true;
+
+
+            startLoop();
+
+          }
+
+        },
+        {
+          rootMargin:
+            "100px 0px"
+        }
+      ).observe(
+        card
       );
 
     }
@@ -882,29 +1048,20 @@
 
     resize();
 
-
-    states.push(
-      state
-    );
-
   }
 
 
   /* =========================================================
-     RENDER ONE CARD
+     DRAW CARD
   ========================================================= */
 
-  function render(
+  function renderState(
     state
   ) {
 
     const ctx =
       state.ctx;
 
-
-    /* =====================================================
-       CACHED BEIGE GRID
-    ===================================================== */
 
     ctx.clearRect(
       0,
@@ -924,8 +1081,8 @@
 
 
     if (
-      state.strength <
-      0.002
+      state.strength <=
+      0.001
     ) {
       return;
     }
@@ -937,122 +1094,116 @@
 
 
     /* =====================================================
-       LIMIT SEARCH TO HOVER AREA
+       LIMIT TO ACTIVE REGION
     ===================================================== */
 
-    const minX =
-      state.focusX -
-      CONFIG.radiusX -
-      CONFIG.pitch;
-
-
-    const maxX =
-      state.focusX +
-      CONFIG.radiusX +
-      CONFIG.pitch;
-
-
-    const minY =
-      state.focusY -
-      CONFIG.radiusY -
-      CONFIG.pitch;
-
-
-    const maxY =
-      state.focusY +
-      CONFIG.radiusY +
-      CONFIG.pitch;
-
-
-    /*
-     * Find nearby grid indexes.
-     *
-     * We never inspect the whole grid.
-     */
     const startColumn =
       clamp(
+
         Math.floor(
           (
-            minX -
+            state.focusX -
+            CONFIG.radiusX -
+            CONFIG.pitch -
             4
           ) /
           CONFIG.pitch
         ),
+
         0,
+
         state.gridX.length -
         1
+
       );
 
 
     const endColumn =
       clamp(
+
         Math.ceil(
           (
-            maxX -
+            state.focusX +
+            CONFIG.radiusX +
+            CONFIG.pitch -
             4
           ) /
           CONFIG.pitch
         ),
+
         0,
+
         state.gridX.length -
         1
+
       );
 
 
     const startRow =
       clamp(
+
         Math.floor(
           (
-            minY -
+            state.focusY -
+            CONFIG.radiusY -
+            CONFIG.pitch -
             4
           ) /
           CONFIG.pitch
         ),
+
         0,
+
         state.gridY.length -
         1
+
       );
 
 
     const endRow =
       clamp(
+
         Math.ceil(
           (
-            maxY -
+            state.focusY +
+            CONFIG.radiusY +
+            CONFIG.pitch -
             4
           ) /
           CONFIG.pitch
         ),
+
         0,
+
         state.gridY.length -
         1
+
       );
 
 
     /* =====================================================
-       OPACITY BUCKETS
+       CLEAR BUCKETS
+
+       Arrays are reused every frame.
     ===================================================== */
 
-    const buckets =
-      [];
-
-
     for (
-      let i = 0;
-      i <
-      CONFIG.buckets;
-      i++
+      let bucket = 0;
+      bucket <
+      state.buckets.length;
+      bucket++
     ) {
 
-      buckets.push(
-        []
-      );
+      state.buckets[
+        bucket
+      ].length =
+        0;
 
     }
 
 
     /* =====================================================
-       BUILD ACTIVE DOTS
+       BUILD ACTIVE DOT REGION
     ===================================================== */
 
     for (
@@ -1087,9 +1238,6 @@
           ];
 
 
-        /*
-         * Elliptical normalized distance.
-         */
         const dx =
           (
             x -
@@ -1121,50 +1269,40 @@
         }
 
 
-        /*
-         * Only calculate sqrt for dots
-         * that are actually inside.
-         */
-        const distance =
-          Math.sqrt(
-            distanceSquared
-          );
-
-
         let intensity =
           smoothstep(
             1 -
-            distance
+            Math.sqrt(
+              distanceSquared
+            )
           );
 
 
-        /*
-         * Same visual falloff.
-         */
         intensity =
           Math.pow(
             intensity,
             0.75
-          );
-
-
-        intensity *=
+          ) *
           state.strength;
 
 
         const bucket =
           clamp(
+
             Math.floor(
               intensity *
               CONFIG.buckets
             ),
+
             0,
+
             CONFIG.buckets -
             1
+
           );
 
 
-        buckets[
+        state.buckets[
           bucket
         ].push(
           x,
@@ -1178,24 +1316,17 @@
 
     /* =====================================================
        DRAW ACTIVE DOTS
-
-       Only 8 canvas fills maximum.
     ===================================================== */
-
-    const TAU =
-      Math.PI *
-      2;
-
 
     for (
       let bucket = 0;
       bucket <
-      buckets.length;
+      state.buckets.length;
       bucket++
     ) {
 
       const points =
-        buckets[
+        state.buckets[
           bucket
         ];
 
@@ -1207,23 +1338,23 @@
       }
 
 
-      const intensity =
+      const alpha =
         (
           bucket +
           1
         ) /
-        buckets.length;
+        state.buckets.length;
 
 
       ctx.fillStyle =
         "rgba(" +
-        CONFIG.activeColor[0] +
+        CONFIG.active[0] +
         "," +
-        CONFIG.activeColor[1] +
+        CONFIG.active[1] +
         "," +
-        CONFIG.activeColor[2] +
+        CONFIG.active[2] +
         "," +
-        intensity.toFixed(
+        alpha.toFixed(
           3
         ) +
         ")";
@@ -1276,7 +1407,7 @@
 
 
   /* =========================================================
-     UPDATE ONE STATE
+     UPDATE
   ========================================================= */
 
   function updateState(
@@ -1291,16 +1422,24 @@
     }
 
 
-    let active =
+    let animating =
       false;
 
 
+    const following =
+      mobile
+        ?
+        state.touching
+        :
+        state.hovering;
+
+
     /* =====================================================
-       CURSOR FOLLOW
+       FOLLOW POINTER
     ===================================================== */
 
     if (
-      state.interacting
+      following
     ) {
 
       const follow =
@@ -1344,7 +1483,7 @@
         0.05
       ) {
 
-        active =
+        animating =
           true;
 
       }
@@ -1353,66 +1492,88 @@
 
 
     /* =====================================================
-       FADE STRENGTH
+       MOBILE FADE
 
-       No GSAP needed.
+       Desktop uses GSAP if available.
     ===================================================== */
 
-    const duration =
-      state.targetStrength >
-      state.strength
-        ?
-        CONFIG.enterSpeed
-        :
-        CONFIG.leaveSpeed;
-
-
-    const speed =
-      1 -
-      Math.exp(
-        -delta /
-        (
-          duration *
-          1000
-        ) *
-        5
-      );
-
-
-    const strengthDelta =
-      state.targetStrength -
-      state.strength;
-
-
-    state.strength +=
-      strengthDelta *
-      speed;
-
-
     if (
-      Math.abs(
-        strengthDelta
-      ) >
-      0.002
+      mobile ||
+      !window.gsap
     ) {
 
-      active =
+      const duration =
+        state.targetStrength >
+        state.strength
+          ?
+          CONFIG.enterSpeed
+          :
+          CONFIG.leaveSpeed;
+
+
+      const speed =
+        1 -
+        Math.exp(
+          (
+            -5 *
+            delta
+          ) /
+          (
+            duration *
+            1000
+          )
+        );
+
+
+      const difference =
+        state.targetStrength -
+        state.strength;
+
+
+      state.strength +=
+        difference *
+        speed;
+
+
+      if (
+        Math.abs(
+          difference
+        ) >
+        0.002
+      ) {
+
+        animating =
+          true;
+
+      } else {
+
+        state.strength =
+          state.targetStrength;
+
+      }
+
+    } else if (
+
+      Math.abs(
+        state.targetStrength -
+        state.strength
+      ) >
+      0.002
+
+    ) {
+
+      animating =
         true;
-
-    } else {
-
-      state.strength =
-        state.targetStrength;
 
     }
 
 
     if (
-      active ||
+      animating ||
       state.dirty
     ) {
 
-      render(
+      renderState(
         state
       );
 
@@ -1423,52 +1584,57 @@
     }
 
 
-    return active;
+    return animating;
 
   }
 
 
   /* =========================================================
-     SHARED LOOP
-
-     Runs ONLY while an animation is active.
+     SHARED RAF
   ========================================================= */
 
   function loop(
     time
   ) {
 
+    raf =
+      0;
+
+
     if (
       time -
-      lastFrame <
+      lastTime <
       frameInterval
     ) {
 
-      requestAnimationFrame(
-        loop
-      );
+      raf =
+        requestAnimationFrame(
+          loop
+        );
+
 
       return;
+
     }
 
 
     const delta =
-      lastFrame
+      lastTime
         ?
         Math.min(
           50,
           time -
-          lastFrame
+          lastTime
         )
         :
         frameInterval;
 
 
-    lastFrame =
+    lastTime =
       time;
 
 
-    let needsAnotherFrame =
+    let keepRunning =
       false;
 
 
@@ -1486,7 +1652,7 @@
         )
       ) {
 
-        needsAnotherFrame =
+        keepRunning =
           true;
 
       }
@@ -1495,82 +1661,29 @@
 
 
     if (
-      needsAnotherFrame
+      keepRunning ||
+      states.some(
+        function (
+          state
+        ) {
+          return state.dirty;
+        }
+      )
     ) {
 
-      requestAnimationFrame(
-        loop
-      );
+      raf =
+        requestAnimationFrame(
+          loop
+        );
 
     } else {
 
-      running =
-        false;
-
-
-      lastFrame =
+      lastTime =
         0;
 
     }
 
   }
-
-
-  function startLoop() {
-
-    if (
-      running
-    ) {
-      return;
-    }
-
-
-    running =
-      true;
-
-
-    lastFrame =
-      0;
-
-
-    requestAnimationFrame(
-      loop
-    );
-
-  }
-
-
-  /* =========================================================
-     TAB VISIBILITY
-  ========================================================= */
-
-  document.addEventListener(
-    "visibilitychange",
-    function () {
-
-      if (
-        !document.hidden
-      ) {
-
-        for (
-          let i = 0;
-          i <
-          states.length;
-          i++
-        ) {
-
-          states[i].dirty =
-            true;
-
-        }
-
-
-        startLoop();
-
-      }
-
-    }
-  );
 
 
   /* =========================================================
@@ -1579,20 +1692,15 @@
 
   function init() {
 
-    const cards =
-      document.querySelectorAll(
+    document
+      .querySelectorAll(
         ".data_home .data-item"
+      )
+      .forEach(
+        buildCard
       );
 
 
-    cards.forEach(
-      createCard
-    );
-
-
-    /*
-     * Initial paint.
-     */
     startLoop();
 
   }
@@ -1607,7 +1715,8 @@
       "DOMContentLoaded",
       init,
       {
-        once: true
+        once:
+          true
       }
     );
 
@@ -1618,7 +1727,7 @@
   }
 
 
-  window.__initMobileMetricDots =
+  window.__initMetricDots =
     init;
 
 })();
