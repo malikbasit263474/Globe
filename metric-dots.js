@@ -504,23 +504,13 @@
     ===================================================== */
 
     function resize() {
-
-      const rect =
-        surface
-          .getBoundingClientRect();
-
-
-      const width =
-        Math.round(
-          rect.width
-        );
+      
+const width =
+  surface.offsetWidth;
 
 
-      const height =
-        Math.round(
-          rect.height
-        );
-
+const height =
+  surface.offsetHeight;
 
       if (
         !width ||
